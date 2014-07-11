@@ -1,95 +1,95 @@
 package robokudos
 
 import (
-  "os"
-  "fmt"
-  "github.com/fzzy/radix/redis"
-  "time"
-  "testing"
+	"fmt"
+	"github.com/fzzy/radix/redis"
+	"net/url"
+	"os"
+	"testing"
+	"time"
 )
 
-// type KudosType struct {
-//   Name string
-//   Kudos int
-// }
-
-// type KudosDatabase struct {
-//   Kudos []KudosType
-// }
-
-// func (db KudosDataBase) Find(name string) int {
-//   for index, kudos := range db.Kudos {
-//     if kudos.Name == name {
-//       return index
-//     }
-//   }
-//   return -1
-// }
-
-// func (db KudosDataBase) ApplyKudos(name string, kudos int) {
-//   index := db.Find(name)
-//   if index >= 0 {
-//     db.Kudos[index].Kudos += kudos
-//   } else {
-//     kudos := KudosType{Name: name, Kudos: kudos}
-//     append(db.Kudos, kudos)
-//   }
-// }
-
-// const KudosFilename = "./kudos.json"
-
-// func Load() KudosDatabase {
-// 	file, e := ioutil.ReadFile(KudosFilename)
-// 	if e != nil {
-// 		fmt.Printf("File error: %v\n", e)
-// 		os.Exit(1)
-// 	}
-// }
-
-// func Save(KudosDatabase) {
-//   file, e := ioutil.WriteFile(KudosFilename)
-//   if e != nil {
-//     fmt.Printf("File error: %v\n", e)
-//     os.Exit(1)
-//   }
-// }
-
-// func ParseRedistogoUrl() (string, string) {
-//   redisUrl := os.Getenv("REDISTOGO_URL")
-//   redisInfo, _ := url.Parse(redisUrl)
-//   server := redisInfo.Host
-//   password := ""
-//   if redisInfo.User != nil {
-//     password, _ = redisInfo.User.Password()
-//   }
-//   return server, password
-// }
-
-func errHndlr(err error) {
-  if err != nil {
-    fmt.Println("error!!", err)
-    os.Exit(1)
-  }
+func ParseRedistogoUrl() (string, string) {
+	redisUrl := os.Getenv("REDISTOGO_URL")
+	redisInfo, _ := url.Parse(redisUrl)
+	server := redisInfo.Host
+	password := ""
+	if redisInfo.User != nil {
+		password, _ = redisInfo.User.Password()
+	}
+	return server, password
 }
 
+func exitOnError(err error) {
+	if err != nil {
+		fmt.Println("Error: %s", err)
+		os.Exit(1)
+	}
+}
 
-func TestLoad(t *testing.T) {
-  client, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
-  errHndlr(err)
+type KudosStore struct {
+	Client *redis.Client
+}
 
-  r = client.Cmd("set", "mykey0", "myval0")
-  errHndlr(r.Err)
+func NewKudosStore() KudosStore {
+	client, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+	exitOnError(err)
+	return KudosStore{Client: client}
+}
 
-  savedKey, err = client.Cmd("get", "mykey0").Str()
-  errHndlr(err)
+const KudosSet = "kudos"
 
-  fmt.Println("Err: ", err)
-  fmt.Println("mykey0:", savedKey)
+func (store *KudosStore) Score(name string) int {
+	reply := store.Client.Cmd("zscore", KudosSet, name)
+	if reply.Type == redis.NilReply {
+		return 0
+	}
+	kudos, err := store.Client.Cmd("zscore", KudosSet, name).Int()
+	exitOnError(err)
+	return kudos
+}
 
-  // Load()
-  // k := KudosType {Name: "Sander", Kudos: 0}
-  // db := KudosDatabase {}
-  // db.ApplyKudos("Sander", 1)
-  // fmt.Printf("%s\n", k)
-  // fmt.Printf("%s\n", db)
+func (store *KudosStore) IncrBy(name string, kudos int) int {
+	kudos, err := store.Client.Cmd("zincrby", KudosSet, kudos, name).Int()
+	exitOnError(err)
+	return kudos
+}
+
+func (store *KudosStore) Rankings() []string {
+	list, err := store.Client.Cmd("zrevrange", KudosSet, 0, -1, "withscores").List()
+	exitOnError(err)
+	return list
+}
+
+func (store *KudosStore) Remove(name string) {
+	reply := store.Client.Cmd("zrem", KudosSet, name)
+	exitOnError(reply.Err)
+}
+
+func (store *KudosStore) Del() {
+	reply := store.Client.Cmd("del", KudosSet)
+	exitOnError(reply.Err)
+}
+
+const TestUser = "test-user"
+
+func TestKudos(t *testing.T) {
+	kudos := NewKudosStore()
+
+	if kudos.Score(TestUser) != 0 {
+		t.Fail()
+	}
+
+	if kudos.IncrBy(TestUser, 5) != 5 {
+		t.Fail()
+	}
+
+	if kudos.Score(TestUser) != 5 {
+		t.Fail()
+	}
+
+	kudos.Remove(TestUser)
+
+	list := kudos.Rankings()
+	fmt.Printf("%s\n", list)
 }
