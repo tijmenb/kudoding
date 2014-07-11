@@ -17,3 +17,9 @@ TBD: figure out what actually to do with kudos once given.
 ### Server
 
 The bot works by [setting up an outgoing webhook in Slack](https://hackersfounders.slack.com/services/new/outgoing-webhook). Whenever a message starts with `kudos to` it'll be sent to Robokudos, which runs on App engine.
+
+### Running locally
+
+Install the [App Engine SDK](https://developers.google.com/appengine/docs/go/gettingstarted/devenvironment) and run:
+
+    goapp serve robokudos.go
