@@ -1,12 +1,11 @@
 package robokudos
 
 import (
- "fmt"
- //  "os"
- //  "io/ioutil"
- //  "encoding/json"
-	"testing"
-  "github.com/xuyu/goredis"
+  "os"
+  "fmt"
+  "github.com/fzzy/radix/redis"
+  "time"
+  "testing"
 )
 
 // type KudosType struct {
@@ -55,38 +54,39 @@ import (
 //   }
 // }
 
-func ParseRedistogoUrl() (string, string) {
-  redisUrl := os.Getenv("REDISTOGO_URL")
-  redisInfo, _ := url.Parse(redisUrl)
-  server := redisInfo.Host
-  password := ""
-  if redisInfo.User != nil {
-    password, _ = redisInfo.User.Password()
-  }
-  return server, password
-}
+// func ParseRedistogoUrl() (string, string) {
+//   redisUrl := os.Getenv("REDISTOGO_URL")
+//   redisInfo, _ := url.Parse(redisUrl)
+//   server := redisInfo.Host
+//   password := ""
+//   if redisInfo.User != nil {
+//     password, _ = redisInfo.User.Password()
+//   }
+//   return server, password
+// }
 
-func RedisConnect() {
-  client, err := Dial()
-  client, err := Dial(&DialConfig{Address: "127.0.0.1:6379"})
-  client, err := DialURL("tcp://127.0.0.1:6379/0?timeout=10s&maxidle=1")
-  if e != nil {
-    fmt.Printf("File error: %v\n", e)
+func errHndlr(err error) {
+  if err != nil {
+    fmt.Println("error!!", err)
     os.Exit(1)
   }
 }
 
-// func SetKudos() {
-//   err := client.Set("key", "value", 0, 0, false, false)
-// }
-
-// func GetKudos() {
-//   value, err := client.Get("key")    
-// }
 
 func TestLoad(t *testing.T) {
-  RedisConnect()
-	// Load()
+  client, err := redis.DialTimeout("tcp", "127.0.0.1:6379", time.Duration(10)*time.Second)
+  errHndlr(err)
+
+  r = client.Cmd("set", "mykey0", "myval0")
+  errHndlr(r.Err)
+
+  savedKey, err = client.Cmd("get", "mykey0").Str()
+  errHndlr(err)
+
+  fmt.Println("Err: ", err)
+  fmt.Println("mykey0:", savedKey)
+
+  // Load()
   // k := KudosType {Name: "Sander", Kudos: 0}
   // db := KudosDatabase {}
   // db.ApplyKudos("Sander", 1)
