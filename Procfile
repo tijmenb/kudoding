@@ -1,2 +1,0 @@
-web: kudoding
-worker: worker

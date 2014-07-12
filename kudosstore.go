@@ -1,24 +1,11 @@
-package web
+package main
 
 import (
 	"fmt"
 	"github.com/fzzy/radix/redis"
-	"net/url"
 	"os"
-	"testing"
 	"time"
 )
-
-func ParseRedistogoUrl() (string, string) {
-	redisUrl := os.Getenv("REDISTOGO_URL")
-	redisInfo, _ := url.Parse(redisUrl)
-	server := redisInfo.Host
-	password := ""
-	if redisInfo.User != nil {
-		password, _ = redisInfo.User.Password()
-	}
-	return server, password
-}
 
 func exitOnError(err error) {
 	if err != nil {
@@ -69,27 +56,4 @@ func (store *KudosStore) Remove(name string) {
 func (store *KudosStore) Del() {
 	reply := store.Client.Cmd("del", KudosSet)
 	exitOnError(reply.Err)
-}
-
-const TestUser = "test-user"
-
-func TestKudos(t *testing.T) {
-	kudos := NewKudosStore()
-
-	if kudos.Score(TestUser) != 0 {
-		t.Fail()
-	}
-
-	if kudos.IncrBy(TestUser, 5) != 5 {
-		t.Fail()
-	}
-
-	if kudos.Score(TestUser) != 5 {
-		t.Fail()
-	}
-
-	kudos.Remove(TestUser)
-
-	list := kudos.Rankings()
-	fmt.Printf("%s\n", list)
 }
