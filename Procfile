@@ -1,1 +1,1 @@
-web: desolate-beach -port=$PORT
+web: desolate-beach-4067 -port=$PORT
