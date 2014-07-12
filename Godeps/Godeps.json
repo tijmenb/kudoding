@@ -1,0 +1,11 @@
+{
+	"ImportPath": "github.com/tijmen/kudoding",
+	"GoVersion": "go1.3",
+	"Deps": [
+		{
+			"ImportPath": "github.com/fzzy/radix/redis",
+			"Comment": "v0.3.4-42-g8770313",
+			"Rev": "87703139f152a67280f72625e9d50d06af08f363"
+		}
+	]
+}

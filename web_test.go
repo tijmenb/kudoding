@@ -1,4 +1,4 @@
-package robokudos
+package web
 
 import (
 	"fmt"
