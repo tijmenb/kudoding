@@ -1,1 +1,2 @@
-web: desolate-beach-4067 -port=$PORT
+web: kudoding
+worker: worker
