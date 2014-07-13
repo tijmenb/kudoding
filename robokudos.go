@@ -21,7 +21,8 @@ func fancyJoin(parts []string) string {
 	return strings.Join(parts[0:last], ", ") + " and " + parts[last]
 }
 
-func giveKudos(names []string) string {
+func giveKudos(users []*User) string {
+	names := userNames(users)
 	responses := []string{fmt.Sprintf("K U D O S given to %s", fancyJoin(names))}
 	for _, name := range names {
 		kudos.IncrBy(name, 1)
@@ -42,15 +43,58 @@ func ranking() string {
 	return strings.Join(responses, "\n")
 }
 
+func refreshUserList() {
+	users := UsersList()
+	kudos.StoreUsers(users)
+}
+
+func handleUsers(ids []string) []*User {
+	users := kudos.GetUsers(ids)
+	if hasNils(users) {
+		refreshUserList()
+	}
+	return kudos.GetUsers(ids)
+}
+
+func userNames(users []*User) []string {
+	names := []string{}
+	for _, user := range users {
+		names = append(names, "@"+user.Name)
+	}
+	return names
+}
+
+func hasNils(list []*User) bool {
+	for _, item := range list {
+		if item == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func reportUnkownUsers(ids []string, users []*User) string {
+	responses := []string{}
+	for index, user := range users {
+		if user == nil {
+			responses = append(responses, fmt.Sprintf("User %s is not known...", ids[index]))
+		}
+	}
+	return strings.Join(responses, "\n")
+}
+
 func answerSlack(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	text := r.FormValue("text")
-	names := parseNames(text)
+	ids := parseNames(text)
+	users := handleUsers(ids)
 
 	var answer string
-	if len(names) > 0 {
-		answer = giveKudos(names)
+	if hasNils(users) {
+		answer = reportUnkownUsers(ids, users)
+	} else if len(users) > 0 {
+		answer = giveKudos(users)
 	} else {
 		answer = ranking()
 	}

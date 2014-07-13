@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 )
@@ -11,6 +11,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Printf("Kudos running on port %s\n", port)
+	log.Printf("Kudos running on port %s\n", port)
 	http.ListenAndServe(":"+port, nil)
 }

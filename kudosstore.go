@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/fzzy/radix/redis"
+	"log"
 	"os"
 	"time"
 )
 
 func exitOnError(err error) {
 	if err != nil {
-		fmt.Println("Error: %s", err)
+		log.Fatal(err)
 		os.Exit(1)
 	}
 }
@@ -56,4 +57,40 @@ func (store *KudosStore) Remove(name string) {
 func (store *KudosStore) Del() {
 	reply := store.Client.Cmd("del", KudosSet)
 	exitOnError(reply.Err)
+}
+
+const UsersHash = "users"
+
+func (store *KudosStore) StoreUsers(users []User) {
+	reply := store.Client.Cmd("del", UsersHash)
+	exitOnError(reply.Err)
+	var hmset []interface{}
+	for _, user := range users {
+		jsonBlob, err := json.Marshal(user)
+		exitOnError(err)
+		hmset = append(hmset, "@"+user.Id)
+		hmset = append(hmset, jsonBlob)
+	}
+	reply = store.Client.Cmd("hmset", UsersHash, hmset)
+	exitOnError(reply.Err)
+}
+
+func (store *KudosStore) GetUsers(ids []string) []*User {
+	if len(ids) == 0 {
+		empty := []*User{}
+		return empty
+	}
+	list, err := store.Client.Cmd("hmget", UsersHash, ids).List()
+	exitOnError(err)
+	users := []*User{}
+	for _, jsonBlob := range list {
+		user := User{}
+		err := json.Unmarshal([]byte(jsonBlob), &user)
+		if err == nil {
+			users = append(users, &user)
+		} else {
+			users = append(users, nil)
+		}
+	}
+	return users
 }
