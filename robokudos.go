@@ -111,7 +111,7 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 	text := r.FormValue("text")
 	user_id := r.FormValue("user_id")
 
-	ids := append(parseNames(text), user_id)
+	ids := append(parseNames(text), "@"+user_id)
 	users := handleUsers(ids)
 
 	var answer string
