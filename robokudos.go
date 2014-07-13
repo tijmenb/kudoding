@@ -111,20 +111,21 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 	text := r.FormValue("text")
 	user_id := r.FormValue("user_id")
 
-	ids := append(parseNames(text), "@"+user_id)
+	// first id and user is the from user
+	ids := append([]string{"@" + user_id}, parseNames(text)...)
 	users := handleUsers(ids)
 
 	var answer string
 	if hasNils(users) {
 		answer = reportUnkownUsers(ids, users)
-	} else if len(users) > 0 {
+	} else if len(users) > 1 {
 		amount := parseAmount(text)
 		if amount != 0 {
-			answer = giveKudos(users, amount)
+			answer = giveKudos(users[1:], amount)
 			now := time.Now().Format("Jan 2 at 3:04pm")
-			text = text + "(from " + user_id + " on " + now + ")"
+			text = text + " (from @" + user_id + " on " + now + ")"
 			text = replaceUserNames(text, users)
-			kudos.StoreKudos(ids, text)
+			kudos.StoreKudos(ids[1:], text)
 		} else {
 			answer = retrieveKudos(users)
 		}
