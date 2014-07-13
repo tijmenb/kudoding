@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/fzzy/radix/redis"
 	"log"
 	"os"
@@ -18,6 +17,7 @@ func exitOnError(err error) {
 
 type KudosStore struct {
 	Client *redis.Client
+	Period string
 }
 
 func NewKudosStore() KudosStore {
@@ -26,37 +26,43 @@ func NewKudosStore() KudosStore {
 	return KudosStore{Client: client}
 }
 
-const KudosSet = "kudos"
+func (store *KudosStore) SetPeriod(time time.Time) {
+	store.Period = time.Format("2006/01")
+}
+
+func (store *KudosStore) kudosSet() string {
+	return "kudos/" + store.Period
+}
 
 func (store *KudosStore) Score(name string) int {
-	reply := store.Client.Cmd("zscore", KudosSet, name)
+	reply := store.Client.Cmd("zscore", store.kudosSet(), name)
 	if reply.Type == redis.NilReply {
 		return 0
 	}
-	kudos, err := store.Client.Cmd("zscore", KudosSet, name).Int()
+	kudos, err := store.Client.Cmd("zscore", store.kudosSet(), name).Int()
 	exitOnError(err)
 	return kudos
 }
 
 func (store *KudosStore) IncrBy(name string, kudos int) int {
-	kudos, err := store.Client.Cmd("zincrby", KudosSet, kudos, name).Int()
+	kudos, err := store.Client.Cmd("zincrby", store.kudosSet(), kudos, name).Int()
 	exitOnError(err)
 	return kudos
 }
 
 func (store *KudosStore) Rankings() []string {
-	list, err := store.Client.Cmd("zrevrange", KudosSet, 0, -1, "withscores").List()
+	list, err := store.Client.Cmd("zrevrange", store.kudosSet(), 0, -1, "withscores").List()
 	exitOnError(err)
 	return list
 }
 
 func (store *KudosStore) Remove(name string) {
-	reply := store.Client.Cmd("zrem", KudosSet, name)
+	reply := store.Client.Cmd("zrem", store.kudosSet(), name)
 	exitOnError(reply.Err)
 }
 
 func (store *KudosStore) Del() {
-	reply := store.Client.Cmd("del", KudosSet)
+	reply := store.Client.Cmd("del", store.kudosSet())
 	exitOnError(reply.Err)
 }
 
@@ -96,17 +102,19 @@ func (store *KudosStore) GetUsers(ids []string) []*User {
 	return users
 }
 
-const KudosLog = "kudoslog/%s"
+func (store *KudosStore) kudosLog(id string) string {
+	return "kudoslog/" + store.Period + "/" + id
+}
 
 func (store *KudosStore) StoreKudos(ids []string, text string) {
 	for _, id := range ids {
-		reply := store.Client.Cmd("rpush", fmt.Sprintf(KudosLog, id), text)
+		reply := store.Client.Cmd("rpush", store.kudosLog(id), text)
 		exitOnError(reply.Err)
 	}
 }
 
 func (store *KudosStore) FetchKudos(id string) []string {
-	list, err := store.Client.Cmd("lrange", fmt.Sprintf(KudosLog, id), 0, -1).List()
+	list, err := store.Client.Cmd("lrange", store.kudosLog(id), 0, -1).List()
 	exitOnError(err)
 	return list
 }

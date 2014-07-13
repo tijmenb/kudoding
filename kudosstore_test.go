@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 func indexOf(list []string, search string) int {
@@ -17,6 +18,9 @@ const TestUser = "test-user"
 
 func TestKudos(t *testing.T) {
 	kudos := NewKudosStore()
+
+	time := time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)
+	kudos.SetPeriod(time)
 
 	if kudos.Score(TestUser) != 0 {
 		t.Fail()

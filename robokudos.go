@@ -106,6 +106,8 @@ func reportUnkownUsers(ids []string, users []*User) string {
 }
 
 func answerSlack(w http.ResponseWriter, r *http.Request) {
+	kudos.SetPeriod(time.Now())
+
 	w.Header().Set("Content-Type", "application/json")
 
 	text := r.FormValue("text")
