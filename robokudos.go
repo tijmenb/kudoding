@@ -127,7 +127,7 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 			text = replaceUserNames(text, users)
 			kudos.StoreKudos(ids[1:], text)
 		} else {
-			answer = retrieveKudos(users)
+			answer = retrieveKudos(users[1:])
 		}
 	} else {
 		answer = ranking()
