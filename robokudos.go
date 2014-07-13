@@ -34,7 +34,7 @@ func giveKudos(users []*User) string {
 func ranking() string {
 	ranks := kudos.Rankings()
 	if len(ranks) == 0 {
-		return "No K U D O S given yet... start collect or giving :-)"
+		return "No K U D O S given yet... start collecting and giving :-)"
 	}
 	responses := []string{"K U D O S ranking:"}
 	for i := 0; i < len(ranks); i += 2 {
@@ -52,8 +52,9 @@ func handleUsers(ids []string) []*User {
 	users := kudos.GetUsers(ids)
 	if hasNils(users) {
 		refreshUserList()
+		return kudos.GetUsers(ids)
 	}
-	return kudos.GetUsers(ids)
+	return users
 }
 
 func userNames(users []*User) []string {
