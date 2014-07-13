@@ -33,7 +33,7 @@ func giveKudos(users []*User, amount int) string {
 }
 
 func retrieveKudos(users []*User) string {
-	responses := []string{fmt.Sprintf("K U D O S given for\n")}
+	responses := []string{fmt.Sprintf("K U D O S given to\n")}
 	for _, user := range users {
 		list := kudos.FetchKudos("@" + user.Id)
 		report := "\n  " + strings.Join(list, "\n  ")
@@ -48,7 +48,7 @@ func retrieveKudos(users []*User) string {
 func ranking() string {
 	ranks := kudos.Rankings()
 	if len(ranks) == 0 {
-		return "No K U D O S given yet... start collecting and giving :-)"
+		return "No K U D O S given yet...\nStart collecting and giving :-)"
 	}
 	responses := []string{"K U D O S ranking:"}
 	for i := 0; i < len(ranks); i += 2 {
