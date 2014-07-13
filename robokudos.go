@@ -34,11 +34,11 @@ func giveKudos(users []*User) string {
 func ranking() string {
 	ranks := kudos.Rankings()
 	if len(ranks) == 0 {
-		return "No K U D O S given yet... lets get busy ;)\nhttps://www.youtube.com/watch?v=_gp51lt9kdA"
+		return "No K U D O S given yet... start collect or giving :-)"
 	}
 	responses := []string{"K U D O S ranking:"}
 	for i := 0; i < len(ranks); i += 2 {
-		responses = append(responses, fmt.Sprintf("%s has ranking %s", ranks[i], ranks[i+1]))
+		responses = append(responses, fmt.Sprintf("%s has score %s", ranks[i], ranks[i+1]))
 	}
 	return strings.Join(responses, "\n")
 }
