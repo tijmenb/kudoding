@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/fzzy/radix/redis"
 	"log"
 	"os"
@@ -93,4 +94,19 @@ func (store *KudosStore) GetUsers(ids []string) []*User {
 		}
 	}
 	return users
+}
+
+const KudosLog = "kudoslog/%s"
+
+func (store *KudosStore) StoreKudos(ids []string, text string) {
+	for _, id := range ids {
+		reply := store.Client.Cmd("rpush", fmt.Sprintf(KudosLog, id), text)
+		exitOnError(reply.Err)
+	}
+}
+
+func (store *KudosStore) FetchKudos(id string) []string {
+	list, err := store.Client.Cmd("lrange", fmt.Sprintf(KudosLog, id), 0, -1).List()
+	exitOnError(err)
+	return list
 }

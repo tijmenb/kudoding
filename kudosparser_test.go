@@ -18,6 +18,18 @@ func TestKudosParser(t *testing.T) {
 	testNames := []string{"@me", "@myself", "@i"}
 	names := parseNames(strings.Join(testNames, " and "))
 	if !stringsEquals(names, testNames) {
-		t.Fail()
+		t.Error()
+	}
+}
+
+func TestKudosAmount(t *testing.T) {
+	if parseAmount(" no amount ") != 0 {
+		t.Error()
+	}
+	if parseAmount(" +2 ") != 2 {
+		t.Error()
+	}
+	if parseAmount(" -3 ") != -3 {
+		t.Error()
 	}
 }

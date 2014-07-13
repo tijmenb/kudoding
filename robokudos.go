@@ -21,12 +21,25 @@ func fancyJoin(parts []string) string {
 	return strings.Join(parts[0:last], ", ") + " and " + parts[last]
 }
 
-func giveKudos(users []*User) string {
+func giveKudos(users []*User, amount int) string {
 	names := userNames(users)
 	responses := []string{fmt.Sprintf("K U D O S given to %s", fancyJoin(names))}
 	for _, name := range names {
-		kudos.IncrBy(name, 1)
+		kudos.IncrBy(name, amount)
 		responses = append(responses, fmt.Sprintf("%s has ranking %d", name, kudos.Score(name)))
+	}
+	return strings.Join(responses, "\n")
+}
+
+func retrieveKudos(users []*User) string {
+	responses := []string{fmt.Sprintf("K U D O S given for\n")}
+	for _, user := range users {
+		list := kudos.FetchKudos("@" + user.Id)
+		report := "\n  " + strings.Join(list, "\n  ")
+		if len(list) == 0 {
+			report = " none yet..."
+		}
+		responses = append(responses, fmt.Sprintf("@%s %s", user.Name, report))
 	}
 	return strings.Join(responses, "\n")
 }
@@ -74,6 +87,13 @@ func hasNils(list []*User) bool {
 	return false
 }
 
+func replaceUserNames(text string, users []*User) string {
+	for _, user := range users {
+		text = strings.Replace(text, "@"+user.Id, "@"+user.Name, 1)
+	}
+	return text
+}
+
 func reportUnkownUsers(ids []string, users []*User) string {
 	responses := []string{}
 	for index, user := range users {
@@ -95,7 +115,14 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 	if hasNils(users) {
 		answer = reportUnkownUsers(ids, users)
 	} else if len(users) > 0 {
-		answer = giveKudos(users)
+		amount := parseAmount(text)
+		if amount != 0 {
+			answer = giveKudos(users, amount)
+			text = replaceUserNames(text, users)
+			kudos.StoreKudos(ids, text)
+		} else {
+			answer = retrieveKudos(users)
+		}
 	} else {
 		answer = ranking()
 	}
