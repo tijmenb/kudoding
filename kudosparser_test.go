@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -32,4 +33,10 @@ func TestKudosAmount(t *testing.T) {
 	if parseAmount(" -3 ") != -3 {
 		t.Error()
 	}
+}
+
+func TestParseSlackTimeStamp(t *testing.T) {
+	timestamp := parseSlackTimestamp("1355517523.000005")
+	const layout = "Jan 2, 2006 at 3:04pm (MST)"
+	fmt.Sprintln(timestamp.Format(layout))
 }

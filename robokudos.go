@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 var kudos = NewKudosStore()
@@ -108,7 +109,9 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	text := r.FormValue("text")
-	ids := parseNames(text)
+	user_id := r.FormValue("user_id")
+
+	ids := append(parseNames(text), user_id)
 	users := handleUsers(ids)
 
 	var answer string
@@ -118,6 +121,8 @@ func answerSlack(w http.ResponseWriter, r *http.Request) {
 		amount := parseAmount(text)
 		if amount != 0 {
 			answer = giveKudos(users, amount)
+			now := time.Now().Format("Jan 2 at 3:04pm")
+			text = text + "(from " + user_id + " on " + now + ")"
 			text = replaceUserNames(text, users)
 			kudos.StoreKudos(ids, text)
 		} else {

@@ -4,6 +4,8 @@ import (
 	"log"
 	"regexp"
 	"strconv"
+	"strings"
+	"time"
 )
 
 func parseNames(text string) []string {
@@ -22,4 +24,19 @@ func parseAmount(text string) int {
 		log.Fatal(err)
 	}
 	return int(amount)
+}
+
+func parseInt(str string) int64 {
+	i, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return i
+}
+
+func parseSlackTimestamp(timestamp string) time.Time {
+	parts := strings.Split(timestamp, ".")
+	sec := parseInt(parts[0])
+	nsec := parseInt(parts[1])
+	return time.Unix(sec, nsec)
 }
