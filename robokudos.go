@@ -38,7 +38,7 @@ func retrieveKudos(users []*User) string {
 		list := kudos.FetchKudos("@" + user.Id)
 		report := "\n  " + strings.Join(list, "\n  ")
 		if len(list) == 0 {
-			report = " none yet..."
+			report = "none yet..."
 		}
 		responses = append(responses, fmt.Sprintf("@%s %s", user.Name, report))
 	}
