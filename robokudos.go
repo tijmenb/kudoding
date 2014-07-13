@@ -22,7 +22,7 @@ func fancyJoin(parts []string) string {
 }
 
 func giveKudos(names []string) string {
-	responses := []string{fmt.Sprintf("Kudos given to %s", fancyJoin(names))}
+	responses := []string{fmt.Sprintf("K U D O S given to %s", fancyJoin(names))}
 	for _, name := range names {
 		kudos.IncrBy(name, 1)
 		responses = append(responses, fmt.Sprintf("%s has ranking %d", name, kudos.Score(name)))
@@ -33,9 +33,9 @@ func giveKudos(names []string) string {
 func ranking() string {
 	ranks := kudos.Rankings()
 	if len(ranks) == 0 {
-		return "No kudos given yet... lets get busy ;)\nhttps://www.youtube.com/watch?v=_gp51lt9kdA"
+		return "No K U D O S given yet... lets get busy ;)\nhttps://www.youtube.com/watch?v=_gp51lt9kdA"
 	}
-	responses := []string{"Kudos ranking:"}
+	responses := []string{"K U D O S ranking:"}
 	for i := 0; i < len(ranks); i += 2 {
 		responses = append(responses, fmt.Sprintf("%s has ranking %s", ranks[i], ranks[i+1]))
 	}
