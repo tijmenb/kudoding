@@ -1,0 +1,23 @@
+{
+  "name": "kudoing",
+  "version": "0.0.0",
+  "homepage": "https://github.com/tijmenb/kudoding",
+  "authors": [
+    "Rene Weteling <rene@weteling.com>"
+  ],
+  "description": "js client for displaying kudo results",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#~0.3.4",
+    "core-elements": "Polymer/core-elements#~0.3.4",
+    "paper-elements": "Polymer/paper-elements#~0.3.4"
+  }
+}
