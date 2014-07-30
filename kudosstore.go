@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"github.com/fzzy/radix/redis"
 	"log"
+	"net/url"
 	"os"
 	"time"
 )
@@ -22,8 +23,14 @@ type KudosStore struct {
 
 func NewKudosStore() KudosStore {
 
-	client, err := redis.DialTimeout("tcp", "redistogo:c88fc9f6b5dcfd15433812ee43b75851@jack.redistogo.com:10669", time.Duration(10)*time.Second)
+	u, _ := url.Parse(os.Getenv("REDISTOGO_URL"))
+	pass, _ := u.User.Password()
+
+	client, err := redis.DialTimeout("tcp", u.Host, time.Duration(10)*time.Second)
 	exitOnError(err)
+
+	client.Cmd("AUTH", pass)
+
 	return KudosStore{Client: client}
 }
 
