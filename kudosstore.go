@@ -21,8 +21,8 @@ type KudosStore struct {
 }
 
 func NewKudosStore() KudosStore {
-	redisgo := os.Getenv("REDISTOGO_URL")
-	client, err := redis.DialTimeout("tcp", redisgo, time.Duration(10)*time.Second)
+
+	client, err := redis.DialTimeout("tcp", "redistogo:c88fc9f6b5dcfd15433812ee43b75851@jack.redistogo.com:10669", time.Duration(10)*time.Second)
 	exitOnError(err)
 	return KudosStore{Client: client}
 }
