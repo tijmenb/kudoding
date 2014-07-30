@@ -18,6 +18,26 @@ TBD: figure out what actually to do with kudos once given.
 
 The bot works by [setting up an outgoing webhook in Slack](https://hackersfounders.slack.com/services/new/outgoing-webhook). Whenever a message starts with `kudos to` it'll be sent to Robokudos, which runs on App engine.
 
+### Running Tests/Local
+
+The kudos bot uses a local Redis server to connect. The Slack API is accessed to be able to translate user ids into user names.
+
+    go get github.com/tools/godep
+
+    go get github.com/tijmenb/kudoding
+
+    cd $GOPATH/src/github.com/tijmenb/kudoding
+
+    git checkout develop
+
+    export KUDOS_TOKEN=... # Please set the environment variable with a Slack API token
+
+    godep go test
+
+    godep go install
+
+    kudoding
+
 ### Running on Heroku
 
 The kudos bot uses a RedisToGo that exposes an `REDISTOGO_URL` environment variable.

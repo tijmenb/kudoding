@@ -31,6 +31,9 @@ type UserListResponse struct {
 
 func UsersList() []User {
 	token := os.Getenv("KUDOS_TOKEN")
+	if token == "" {
+		log.Fatal("Please set KUDOS_TOKEN environment variable with a Slack API token!")
+	}
 	api_url := "https://slack.com/api/users.list"
 	v := url.Values{}
 	v.Set("token", token)

@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"testing"
 )
 
 func TestUserList(t *testing.T) {
 	apiUsers := UsersList()
-	fmt.Printf("%v", apiUsers)
 	if len(apiUsers) < 1 {
 		t.Fail()
 	}

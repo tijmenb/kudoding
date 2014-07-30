@@ -23,13 +23,21 @@ type KudosStore struct {
 
 func NewKudosStore() KudosStore {
 
-	u, _ := url.Parse(os.Getenv("REDISTOGO_URL"))
-	pass, _ := u.User.Password()
+	redis_url := os.Getenv("REDISTOGO_URL")
+	if redis_url == "" {
+		redis_url = "redis://127.0.0.1:6379"
+	}
+
+	u, _ := url.Parse(redis_url)
 
 	client, err := redis.DialTimeout("tcp", u.Host, time.Duration(10)*time.Second)
 	exitOnError(err)
 
-	client.Cmd("AUTH", pass)
+	if u.User != nil {
+		pass, _ := u.User.Password()
+		client.Cmd("AUTH", pass)
+		log.Println(pass)
+	}
 
 	return KudosStore{Client: client}
 }
