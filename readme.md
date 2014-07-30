@@ -20,6 +20,8 @@ The bot works by [setting up an outgoing webhook in Slack](https://hackersfounde
 
 ### Running on Heroku
 
+The kudos bot uses a RedisToGo that exposes an `REDISTOGO_URL` environment variable.
+
     heroku git:remote -a kudos-hf
 
     heroku config:add BUILDPACK_URL=https://github.com/kr/heroku-buildpack-go.git
