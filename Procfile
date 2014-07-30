@@ -1,2 +1,2 @@
-web: go-heroku-example
-worker: worker
+web: kudoding
+# worker: worker
