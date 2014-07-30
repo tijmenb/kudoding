@@ -22,12 +22,10 @@ The bot works by [setting up an outgoing webhook in Slack](https://hackersfounde
 
     heroku git:remote -a kudos-hf
 
-    git push heroku develop
-
     heroku config:add BUILDPACK_URL=https://github.com/kr/heroku-buildpack-go.git
 
-    git push heroku develop:master # deploy develop branch to master on heroku
-
     heroku config:set KUDOS_TOKEN=... # generate token in Slack API integrations
+
+    git push heroku develop:master # deploy develop branch to master on heroku
 
     heroku logs
